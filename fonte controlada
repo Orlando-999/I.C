@@ -1,0 +1,100 @@
+--testbench 
+
+use work.funcoes.all;
+use work.tipos.all;
+
+entity tb_fonte_controlada is
+end entity;
+
+architecture teste of tb_fonte_controlada is
+
+  signal Tensao       : vet_int := (0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50);
+  signal Transcond    : integer := 2;
+  signal corrente_out    : vet_int;
+
+begin
+
+  Fonte: entity work.fonte_controlada
+  
+  port map (
+      Tensao_in     => Tensao,
+      Ganho         => Transcond,
+      corrente_out  => corrente_out
+    );
+
+  process
+  begin
+       wait for 1 ns;
+
+    
+    for i in corrente_out'range loop
+      report integer'image(corrente_out(i));
+    end loop;
+
+    wait;
+  end process;
+
+end architecture;
+
+............................................................................................
+
+--design
+
+use work.funcoes.all;
+use work.tipos.all;
+
+entity fonte_controlada is
+ 
+ port (
+    Tensao_in    : in  vet_int;
+    Ganho        : in  integer;
+    corrente_out : out vet_int
+  );
+  
+end entity fonte_controlada;
+
+architecture main of fonte_controlada is
+begin
+  corrente_out <= mult_vet_esc(Ganho, Tensao_in);
+end architecture;
+
+
+............................................................................................
+
+--funcoes
+
+use work.tipos.all;
+
+
+
+package funcoes is
+  function mult_vet_esc (escalar : integer;vetor   : vet_int) 
+  return vet_int;
+end package;
+
+
+package body funcoes is
+  function mult_vet_esc (escalar : integer; vetor   : vet_int ) 
+  return vet_int is
+  
+    variable resultado : vet_int;
+  
+  begin
+    for i in vetor'range loop
+      resultado(i) := escalar * vetor(i);
+    end loop;
+    return resultado;
+  end function;
+end package body;
+............................................................................................
+
+--tipos
+
+package tipos is 
+  type vet_int is array (0 to 10) of integer; 
+end package;
+
+package body tipos is 
+end package body;
+
+
