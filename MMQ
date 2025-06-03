@@ -1,0 +1,125 @@
+--testbench
+
+use work.funcoes.all;
+use work.tipos.all;
+
+
+entity tb_MMQ is
+end entity;
+
+architecture test of tb_MMQ is
+
+  signal X : vet_int := (0,  5, 10, 15, 20, 25, 30, 35, 40, 45, 50);
+  signal Y : vet_int := (0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100);
+  signal a : integer;
+
+begin
+
+  entidade_do_teste: entity work.MMQ
+    port map (
+      X => X,
+      Y => Y,
+      a => a
+    );
+
+  process
+  begin
+    wait for 10 ns;
+    report integer'image(a);
+    wait;
+  end process;
+
+end architecture;
+
+
+
+........................................................................
+--design
+
+
+use work.funcoes.all;
+use work.tipos.all;
+
+
+entity MMQ is
+  port (
+    X      : in    vet_int;
+    Y      : in    vet_int;
+    a      : out   integer 
+  );
+end entity;
+
+
+
+architecture main of MMQ is
+begin
+
+  process(X, Y)
+    variable SXY   : integer;
+    variable SXX   : integer;
+    variable SXvSY : integer;
+    variable SXvSX : integer;
+  begin
+  
+    -- Calculando somatórios auxiliares
+    SXY   := somatorio_vet(mult_vet(X, Y));
+    SXX   := somatorio_vet(mult_vet(X, X));  
+    SXvSY := somatorio_vet(X) * somatorio_vet(Y);
+    SXvSX := somatorio_vet(X) * somatorio_vet(X);
+
+    -- Cálculo final de 'a'
+    a <= ( SXvSY - 11 * SXY) / (SXvSX - 11 * SXX);
+  end process;
+
+end architecture;
+
+...................................................................................
+--definição das funções
+
+
+
+use work.tipos.all;
+
+
+package funcoes is 
+   function somatorio_vet (v :  vet_int) return integer;
+   function mult_vet ( vetor1 : vet_int; vetor2 : vet_int) return vet_int;
+	
+end package;
+
+
+package body funcoes is 
+
+  function somatorio_vet (v : vet_int) return integer is
+   variable soma : integer := 0;
+   begin
+       for i in v'range loop
+           soma := soma + v(i);
+       end loop;
+    return soma;
+  end function;
+    
+
+  function mult_vet ( vetor1 : vet_int; vetor2  : vet_int) return vet_int is
+    variable resultado : vet_int;
+    begin
+       for i in 0 to 10 loop
+          resultado(i) := vetor1(i) * vetor2(i);
+       end loop;
+    return resultado;
+  end function;
+
+
+end package body;
+
+
+.............................................................................................
+--definição do tipo vetor de inteiros
+
+
+package tipos is 
+  type vet_int is array (0 to 10) of integer; 
+end package;
+
+package body tipos is 
+end package body;
